@@ -26,10 +26,10 @@
         const cellSize = 50;
         const offsetX = cellSize;
         const offsetY = cellSize;
-        const hitboxSize = 20; // Size of the clickable area around each point
+        const hitboxSize = 20;
 
         let currentPlayer = 1;
-        let ballPosition = { x: 5, y: 5 };
+        let ballPosition = { x: 5, y: 5 }; // Starting from the center
         let lines = new Set();
         let validMoves = [];
 
@@ -49,9 +49,19 @@
         }
 
         function drawGoals() {
-            ctx.fillStyle = '#ddd';
+            // Player 2's goal (top)
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; // Green for Player 2
             ctx.fillRect(offsetX + 4 * cellSize, 0, 2 * cellSize, cellSize);
+            
+            // Player 1's goal (bottom)
+            ctx.fillStyle = 'rgba(0, 0, 255, 0.3)'; // Blue for Player 1
             ctx.fillRect(offsetX + 4 * cellSize, offsetY + 10 * cellSize, 2 * cellSize, cellSize);
+            
+            // Labels
+            ctx.fillStyle = 'black';
+            ctx.font = '14px Arial';
+            ctx.fillText("Player 2 defends", offsetX + 4 * cellSize, 20);
+            ctx.fillText("Player 1 defends", offsetX + 4 * cellSize, offsetY + 11 * cellSize - 5);
         }
 
         function drawBall() {
@@ -108,11 +118,19 @@
 
         function checkWin() {
             if (ballPosition.y === 0 && ballPosition.x >= 4 && ballPosition.x <= 5) {
-                alert("Player 2 wins!");
+                if (currentPlayer === 1) {
+                    alert("Player 1 wins!");
+                } else {
+                    alert("Player 1 wins! (Player 2 scored an own goal)");
+                }
                 return true;
             }
             if (ballPosition.y === gridSize && ballPosition.x >= 4 && ballPosition.x <= 5) {
-                alert("Player 1 wins!");
+                if (currentPlayer === 2) {
+                    alert("Player 2 wins!");
+                } else {
+                    alert("Player 2 wins! (Player 1 scored an own goal)");
+                }
                 return true;
             }
             return false;
