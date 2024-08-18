@@ -1,0 +1,8 @@
+The rules are:
+The game's pitch is drawn as a rectangle on a grid, with small extended rectangles in the center of each of the two shortest sides to represent the two goalposts. The grid 10 by 10 squares. The goal areas are typically 2 × 1 squares in size.
+
+A "ball" is marked as a dot in the center of the pitch. Players alternately move the ball to a new point by drawing a line from its current position to a new one. Each move must be to a point orthogonally or diagonally adjacent. The ball cannot be moved beyond the boundary of the pitch, nor along a line that has already been drawn (including the boundary of the pitch).
+
+If the ball is moved to a point that already has one or more lines connected to it, including the perimeter of the pitch, the ball "bounces" and the player immediately takes another turn. The player's move ends only when the ball reaches a point with no existing lines.
+
+The winner is the player who places the ball in their opponent's goal. A player also wins if their opponent scores an own goal. If the ball reaches a point from which it cannot be moved (such as a corner of the pitch) this is regarded as a draw, or a loss for the player unable to move, depending on the rules being played. In some versions of the game, their own goals and moves that make it impossible to move are illegal.
