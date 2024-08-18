@@ -26,10 +26,12 @@
         const cellSize = 50;
         const offsetX = cellSize;
         const offsetY = cellSize;
+        const hitboxSize = 20; // Size of the clickable area around each point
 
         let currentPlayer = 1;
         let ballPosition = { x: 5, y: 5 };
         let lines = new Set();
+        let validMoves = [];
 
         function drawGrid() {
             ctx.strokeStyle = '#ccc';
@@ -71,12 +73,37 @@
             });
         }
 
+        function drawValidMoves() {
+            ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+            validMoves.forEach(move => {
+                ctx.beginPath();
+                ctx.arc(offsetX + move.x * cellSize, offsetY + move.y * cellSize, hitboxSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
         function isValidMove(x, y) {
             if (x < 0 || x > gridSize || y < 0 || y > gridSize) return false;
             const newLine = JSON.stringify([ballPosition, { x, y }, currentPlayer]);
             const reverseLine = JSON.stringify([{ x, y }, ballPosition, currentPlayer]);
-            if (lines.has(newLine) || lines.has(reverseLine)) return false;
+            const otherPlayerLine1 = JSON.stringify([ballPosition, { x, y }, 3 - currentPlayer]);
+            const otherPlayerLine2 = JSON.stringify([{ x, y }, ballPosition, 3 - currentPlayer]);
+            if (lines.has(newLine) || lines.has(reverseLine) || lines.has(otherPlayerLine1) || lines.has(otherPlayerLine2)) return false;
             return Math.abs(x - ballPosition.x) <= 1 && Math.abs(y - ballPosition.y) <= 1 && (x !== ballPosition.x || y !== ballPosition.y);
+        }
+
+        function updateValidMoves() {
+            validMoves = [];
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const newX = ballPosition.x + dx;
+                    const newY = ballPosition.y + dy;
+                    if (isValidMove(newX, newY)) {
+                        validMoves.push({ x: newX, y: newY });
+                    }
+                }
+            }
         }
 
         function checkWin() {
@@ -93,22 +120,30 @@
 
         function handleClick(event) {
             const rect = canvas.getBoundingClientRect();
-            const x = Math.floor((event.clientX - rect.left - offsetX) / cellSize);
-            const y = Math.floor((event.clientY - rect.top - offsetY) / cellSize);
+            const clickX = event.clientX - rect.left - offsetX;
+            const clickY = event.clientY - rect.top - offsetY;
 
-            if (isValidMove(x, y)) {
-                const newLine = JSON.stringify([ballPosition, { x, y }, currentPlayer]);
-                lines.add(newLine);
-                ballPosition = { x, y };
+            for (let move of validMoves) {
+                const moveX = move.x * cellSize;
+                const moveY = move.y * cellSize;
+                const distance = Math.sqrt((clickX - moveX) ** 2 + (clickY - moveY) ** 2);
 
-                if (checkWin()) {
-                    canvas.removeEventListener('click', handleClick);
-                    return;
+                if (distance <= hitboxSize) {
+                    const newLine = JSON.stringify([ballPosition, move, currentPlayer]);
+                    lines.add(newLine);
+                    ballPosition = move;
+
+                    if (checkWin()) {
+                        canvas.removeEventListener('click', handleClick);
+                        return;
+                    }
+
+                    currentPlayer = 3 - currentPlayer; // Switch player (1 -> 2, 2 -> 1)
+                    updateTurnIndicator();
+                    updateValidMoves();
+                    draw();
+                    break;
                 }
-
-                currentPlayer = 3 - currentPlayer; // Switch player (1 -> 2, 2 -> 1)
-                updateTurnIndicator();
-                draw();
             }
         }
 
@@ -122,10 +157,17 @@
             drawGrid();
             drawGoals();
             drawLines();
+            drawValidMoves();
             drawBall();
         }
 
         canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('mousemove', () => {
+            updateValidMoves();
+            draw();
+        });
+
+        updateValidMoves();
         updateTurnIndicator();
         draw();
     </script>
