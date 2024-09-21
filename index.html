@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,14 @@
         canvas {
             border: 1px solid black;
         }
+
         #turnIndicator {
             font-size: 24px;
             margin-top: 10px;
         }
     </style>
 </head>
+
 <body>
     <canvas id="gameCanvas" width="600" height="600"></canvas>
     <div id="turnIndicator"></div>
@@ -52,11 +55,11 @@
             // Player 2's goal (top)
             ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; // Green for Player 2
             ctx.fillRect(offsetX + 4 * cellSize, 0, 2 * cellSize, cellSize);
-            
+
             // Player 1's goal (bottom)
             ctx.fillStyle = 'rgba(0, 0, 255, 0.3)'; // Blue for Player 1
             ctx.fillRect(offsetX + 4 * cellSize, offsetY + 10 * cellSize, 2 * cellSize, cellSize);
-            
+
             // Labels
             ctx.fillStyle = 'black';
             ctx.font = '14px Arial';
@@ -101,7 +104,17 @@
             if (lines.has(newLine) || lines.has(reverseLine) || lines.has(otherPlayerLine1) || lines.has(otherPlayerLine2)) return false;
             return Math.abs(x - ballPosition.x) <= 1 && Math.abs(y - ballPosition.y) <= 1 && (x !== ballPosition.x || y !== ballPosition.y);
         }
-
+        function isExistingNode(position) {
+            let connectionCount = 0;
+            for (let line of lines) {
+                const [start, end] = JSON.parse(line);
+                if ((start.x === position.x && start.y === position.y) ||
+                    (end.x === position.x && end.y === position.y)) {
+                    connectionCount++;
+                }
+            }
+            return connectionCount > 0;
+        }
         function updateValidMoves() {
             validMoves = [];
             for (let dx = -1; dx <= 1; dx++) {
@@ -148,6 +161,7 @@
 
                 if (distance <= hitboxSize) {
                     const newLine = JSON.stringify([ballPosition, move, currentPlayer]);
+                    const wasExistingNode = isExistingNode(move);
                     lines.add(newLine);
                     ballPosition = move;
 
@@ -156,7 +170,11 @@
                         return;
                     }
 
-                    currentPlayer = 3 - currentPlayer; // Switch player (1 -> 2, 2 -> 1)
+                    if (!wasExistingNode) {
+                        currentPlayer = 3 - currentPlayer; // Switch player (1 -> 2, 2 -> 1)
+                    }
+                    // If it was an existing node, the current player gets another turn
+
                     updateTurnIndicator();
                     updateValidMoves();
                     draw();
@@ -190,4 +208,5 @@
         draw();
     </script>
 </body>
+
 </html>
